@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script defer src="/_vercel/insights/script.js"></script>
-  <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Spin the Wheel of Dares 🎯</title>
@@ -320,9 +318,102 @@
       color: rgba(255,255,255,0.2);
       font-size: 0.8rem;
     }
+
+    /* Password Screen */
+    #passwordScreen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      gap: 1.5rem;
+    }
+
+    #passwordScreen h2 {
+      font-family: 'Bangers', cursive;
+      font-size: 3rem;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #passwordScreen p {
+      color: rgba(255,255,255,0.5);
+      font-size: 1rem;
+    }
+
+    #passwordInput {
+      background: var(--card);
+      border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 0.9rem 1.5rem;
+      font-size: 1.2rem;
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      text-align: center;
+      width: 260px;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    #passwordInput:focus { border-color: var(--accent2); }
+
+    #passwordInput.wrong {
+      border-color: var(--accent1);
+      animation: shake 0.4s ease;
+    }
+
+    #unlockBtn {
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      border: none;
+      border-radius: 50px;
+      padding: 0.9rem 2.5rem;
+      font-family: 'Bangers', cursive;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      color: #0f0e17;
+      cursor: pointer;
+      box-shadow: 0 6px 30px rgba(255,107,107,0.4);
+      transition: transform 0.15s;
+    }
+
+    #unlockBtn:hover { transform: translateY(-2px); }
+
+    #wrongMsg {
+      color: var(--accent1);
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      100% { opacity: 0; pointer-events: none; }
+    }
+
+    .fade-out { animation: fadeOut 0.5s ease forwards !important; }
   </style>
 </head>
 <body>
+
+<!-- Password Screen -->
+<div id="passwordScreen">
+  <h2>🔐 Enter Password</h2>
+  <p>This wheel is for VIPs only 😏</p>
+  <input type="password" id="passwordInput" placeholder="Type password..." />
+  <p id="wrongMsg">❌ Wrong password! Try again.</p>
+  <button id="unlockBtn" onclick="checkPassword()">UNLOCK 🔓</button>
+</div>
 
 <header>
   <h1>🎯 Wheel of Dares</h1>
@@ -368,19 +459,42 @@
 <footer>Built with Claude 🤖 • Dare responsibly 😄</footer>
 
 <script>
+  // Password protection
+  function checkPassword() {
+    const input = document.getElementById('passwordInput').value;
+    const wrongMsg = document.getElementById('wrongMsg');
+    const inputEl = document.getElementById('passwordInput');
+    if (input === 'ahmad') {
+      document.getElementById('passwordScreen').classList.add('fade-out');
+      setTimeout(() => document.getElementById('passwordScreen').style.display = 'none', 500);
+    } else {
+      wrongMsg.style.display = 'block';
+      inputEl.classList.add('wrong');
+      inputEl.value = '';
+      setTimeout(() => inputEl.classList.remove('wrong'), 400);
+    }
+  }
+
+  // Allow pressing Enter key
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('passwordInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkPassword();
+    });
+  });
+
   const dares = [
-    { text: "Talk in a robot voice for 1 minute 🤖", emoji: "🤖" },
-    { text: "Do your best impression of a cat 🐱", emoji: "🐱" },
-    { text: "Say 'banana' after every sentence for 2 mins 🍌", emoji: "🍌" },
-    { text: "Do 10 jumping jacks right now! 🏃", emoji: "🏃" },
-    { text: "Text someone 'I know what you did' 👀", emoji: "👀" },
-    { text: "Speak in slow motion for 1 minute 🐢", emoji: "🐢" },
-    { text: "Do your best celebrity impression 🌟", emoji: "🌟" },
-    { text: "Sing the next thing you say 🎵", emoji: "🎵" },
-    { text: "Do a dramatic movie villain laugh 😈", emoji: "😈" },
-    { text: "Act like you're being filmed for a documentary 🎬", emoji: "🎬" },
-    { text: "Narrate everything you do for 2 minutes 📢", emoji: "📢" },
-    { text: "Walk like a penguin for 1 minute 🐧", emoji: "🐧" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
+    { text: "Chat someone random saying 'I love you' 💌", emoji: "💌" },
   ];
 
   const colors = [
