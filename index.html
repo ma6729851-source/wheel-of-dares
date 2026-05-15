@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spin the Wheel of Dares 🎯</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0f0e17;
+      --card: #1a1a2e;
+      --accent1: #ff6b6b;
+      --accent2: #ffd93d;
+      --accent3: #6bcb77;
+      --accent4: #4d96ff;
+      --accent5: #ff9f1c;
+      --accent6: #c77dff;
+      --text: #fffffe;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Stars background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, white 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%, white 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 60%, white 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%, white 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 70%, white 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 90%, white 0%, transparent 100%),
+        radial-gradient(2px 2px at 65% 40%, rgba(255,255,255,0.5) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    header {
+      text-align: center;
+      padding: 2rem 1rem 0.5rem;
+      z-index: 1;
+    }
+
+    header h1 {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      letter-spacing: 4px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1), var(--accent6));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.5));
+    }
+
+    header p {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.6);
+      margin-top: 0.3rem;
+    }
+
+    .game-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+      padding: 1.5rem;
+      z-index: 1;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    /* Wheel container */
+    .wheel-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wheel-pointer {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 30px solid var(--accent2);
+      filter: drop-shadow(0 2px 6px rgba(255,217,61,0.8));
+      z-index: 10;
+    }
+
+    canvas {
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 6px rgba(255,255,255,0.08),
+        0 0 40px rgba(255,107,107,0.3),
+        0 0 80px rgba(77,150,255,0.2);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    canvas:hover {
+      transform: scale(1.02);
+    }
+
+    .center-btn {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent1));
+      border: 4px solid white;
+      font-family: 'Bangers', cursive;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      color: #0f0e17;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255,217,61,0.6);
+      transition: transform 0.15s, box-shadow 0.15s;
+      z-index: 10;
+    }
+
+    .center-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 30px rgba(255,217,61,0.9);
+    }
+
+    .center-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Result box */
+    .result-box {
+      background: var(--card);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      width: 100%;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(77,150,255,0.05));
+      pointer-events: none;
+    }
+
+    .result-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 0.3rem;
+      animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .result-text {
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--accent2);
+      line-height: 1.4;
+    }
+
+    .result-placeholder {
+      color: rgba(255,255,255,0.3);
+      font-size: 1rem;
+    }
+
+    /* Spin button */
+    .spin-btn {
+      background: linear-gradient(135deg, var(--accent1), var(--accent5));
+      border: none;
+      border-radius: 50px;
+      padding: 1rem 3rem;
+      font-family: 'Bangers', cursive;
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px 30px rgba(255, 107, 107, 0.5);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .spin-btn:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.7);
+    }
+
+    .spin-btn:active { transform: scale(0.97); }
+    .spin-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Score */
+    .score-bar {
+      display: flex;
+      gap: 1.5rem;
+      background: var(--card);
+      border-radius: 50px;
+      padding: 0.6rem 1.5rem;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .score-item {
+      text-align: center;
+    }
+
+    .score-item span {
+      display: block;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .score-item strong {
+      font-size: 1.4rem;
+      font-family: 'Bangers', cursive;
+      letter-spacing: 1px;
+    }
+
+    .spins-count { color: var(--accent4); }
+    .done-count { color: var(--accent3); }
+    .skip-count { color: var(--accent1); }
+
+    /* Action buttons */
+    .action-btns {
+      display: flex;
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .done-btn, .skip-btn {
+      flex: 1;
+      padding: 0.8rem;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      display: none;
+    }
+
+    .done-btn {
+      background: var(--accent3);
+      color: #0f0e17;
+    }
+
+    .skip-btn {
+      background: var(--accent1);
+      color: white;
+    }
+
+    .done-btn:hover, .skip-btn:hover { transform: scale(1.03); }
+    .done-btn.visible, .skip-btn.visible { display: block; }
+
+    /* Confetti */
+    .confetti-piece {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      top: -10px;
+      animation: confettiFall linear forwards;
+      z-index: 100;
+      pointer-events: none;
+      border-radius: 2px;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(255,217,61,0.3); }
+      50% { box-shadow: 0 0 40px rgba(255,217,61,0.8); }
+    }
+
+    .spinning canvas {
+      animation: none;
+    }
+
+    footer {
+      z-index: 1;
+      padding: 1.5rem;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🎯 Wheel of Dares</h1>
+  <p>Spin it. Own it. No excuses! 😈</p>
+</header>
+
+<div class="game-area">
+
+  <div class="score-bar">
+    <div class="score-item">
+      <span>Spins</span>
+      <strong class="spins-count" id="spinCount">0</strong>
+    </div>
+    <div class="score-item">
+      <span>Done ✅</span>
+      <strong class="done-count" id="doneCount">0</strong>
+    </div>
+    <div class="score-item">
+      <span>Skipped 🐔</span>
+      <strong class="skip-count" id="skipCount">0</strong>
+    </div>
+  </div>
+
+  <div class="wheel-wrapper" id="wheelWrapper">
+    <div class="wheel-pointer"></div>
+    <canvas id="wheel" width="320" height="320"></canvas>
+    <button class="center-btn" id="centerBtn">SPIN</button>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <p class="result-placeholder">🎯 Spin the wheel to get your dare!</p>
+  </div>
+
+  <div class="action-btns">
+    <button class="done-btn" id="doneBtn">✅ I Did It!</button>
+    <button class="skip-btn" id="skipBtn">🐔 I'm a Chicken</button>
+  </div>
+
+  <button class="spin-btn" id="spinBtn">SPIN IT! 🎰</button>
+
+</div>
+
+<footer>Built with Claude 🤖 • Dare responsibly 😄</footer>
+
+<script>
+  const dares = [
+    { text: "Talk in a robot voice for 1 minute 🤖", emoji: "🤖" },
+    { text: "Do your best impression of a cat 🐱", emoji: "🐱" },
+    { text: "Say 'banana' after every sentence for 2 mins 🍌", emoji: "🍌" },
+    { text: "Do 10 jumping jacks right now! 🏃", emoji: "🏃" },
+    { text: "Text someone 'I know what you did' 👀", emoji: "👀" },
+    { text: "Speak in slow motion for 1 minute 🐢", emoji: "🐢" },
+    { text: "Do your best celebrity impression 🌟", emoji: "🌟" },
+    { text: "Sing the next thing you say 🎵", emoji: "🎵" },
+    { text: "Do a dramatic movie villain laugh 😈", emoji: "😈" },
+    { text: "Act like you're being filmed for a documentary 🎬", emoji: "🎬" },
+    { text: "Narrate everything you do for 2 minutes 📢", emoji: "📢" },
+    { text: "Walk like a penguin for 1 minute 🐧", emoji: "🐧" },
+  ];
+
+  const colors = [
+    '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
+    '#ff9f1c', '#c77dff', '#ff6b6b', '#ffd93d',
+    '#6bcb77', '#4d96ff', '#ff9f1c', '#c77dff'
+  ];
+
+  const canvas = document.getElementById('wheel');
+  const ctx = canvas.getContext('2d');
+  const spinBtn = document.getElementById('spinBtn');
+  const centerBtn = document.getElementById('centerBtn');
+  const resultBox = document.getElementById('resultBox');
+  const doneBtn = document.getElementById('doneBtn');
+  const skipBtn = document.getElementById('skipBtn');
+
+  let currentAngle = 0;
+  let isSpinning = false;
+  let spinCount = 0, doneCount = 0, skipCount = 0;
+  let currentDare = null;
+
+  const arc = (2 * Math.PI) / dares.length;
+
+  function drawWheel(angle) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const r = cx - 8;
+
+    dares.forEach((dare, i) => {
+      const startAngle = angle + i * arc;
+      const endAngle = startAngle + arc;
+
+      // Slice
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Emoji label
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(startAngle + arc / 2);
+      ctx.textAlign = 'right';
+      ctx.font = '22px serif';
+      ctx.fillText(dare.emoji, r - 10, 8);
+      ctx.restore();
+    });
+
+    // Center circle
+    ctx.beginPath();
+    ctx.arc(cx, cy, 28, 0, 2 * Math.PI);
+    ctx.fillStyle = '#0f0e17';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  }
+
+  function spin() {
+    if (isSpinning) return;
+    isSpinning = true;
+    spinBtn.disabled = true;
+    centerBtn.disabled = true;
+    doneBtn.classList.remove('visible');
+    skipBtn.classList.remove('visible');
+    resultBox.innerHTML = `<p class="result-placeholder">🌀 Spinning...</p>`;
+
+    const extraSpins = (5 + Math.floor(Math.random() * 5)) * 2 * Math.PI;
+    const randomStop = Math.random() * 2 * Math.PI;
+    const totalRotation = extraSpins + randomStop;
+    const duration = 3000 + Math.random() * 1500;
+    const startTime = performance.now();
+    const startAngle = currentAngle;
+
+    function easeOut(t) {
+      return 1 - Math.pow(1 - t, 4);
+    }
+
+    function animate(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOut(progress);
+
+      currentAngle = startAngle + totalRotation * easedProgress;
+      drawWheel(currentAngle);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        isSpinning = false;
+        spinBtn.disabled = false;
+        centerBtn.disabled = false;
+        spinCount++;
+        document.getElementById('spinCount').textContent = spinCount;
+        showResult();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  function showResult() {
+    // Figure out which slice is at the top (pointer)
+    const normalizedAngle = ((currentAngle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const pointerAngle = (3 * Math.PI / 2); // top
+    const relativeAngle = (pointerAngle - normalizedAngle + 2 * Math.PI) % (2 * Math.PI);
+    const index = Math.floor(relativeAngle / arc) % dares.length;
+    currentDare = dares[index];
+
+    resultBox.innerHTML = `
+      <div class="result-emoji">${currentDare.emoji}</div>
+      <p class="result-text">${currentDare.text}</p>
+    `;
+
+    doneBtn.classList.add('visible');
+    skipBtn.classList.add('visible');
+    launchConfetti();
+  }
+
+  function launchConfetti() {
+    const confettiColors = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+        el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+        el.style.width = el.style.height = (6 + Math.random() * 10) + 'px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }, i * 30);
+    }
+  }
+
+  doneBtn.addEventListener('click', () => {
+    doneCount++;
+    document.getElementById('doneCount').textContent = doneCount;
+    doneBtn.classList.remove('visible');
+    skipBtn.classList.remove('visible');
+    resultBox.innerHTML = `<p class="result-placeholder">🎉 Legend! Spin again!</p>`;
+    launchConfetti();
+  });
+
+  skipBtn.addEventListener('click', () => {
+    skipCount++;
+    document.getElementById('skipCount').textContent = skipCount;
+    doneBtn.classList.remove('visible');
+    skipBtn.classList.remove('visible');
+    resultBox.innerHTML = `<p class="result-placeholder">🐔 Chicken! Try again...</p>`;
+  });
+
+  spinBtn.addEventListener('click', spin);
+  centerBtn.addEventListener('click', spin);
+  canvas.addEventListener('click', spin);
+
+  // Initial draw
+  drawWheel(currentAngle);
+</script>
+</body>
+</html>
